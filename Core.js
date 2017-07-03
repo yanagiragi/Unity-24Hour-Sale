@@ -102,8 +102,6 @@ function parse(data){
       wrapUp();
       return;
   }
-
-
 	DailyData.title = data.daily.title
 	DailyData.id = data.daily.id
 	DailyData.description = data.daily.description
@@ -135,6 +133,37 @@ function updatePrice(priceData){
 	DailyData.rrp = priceData.rrp
 	DailyData.price = priceData.price
 	DailyData.percentage = priceData.discount.percentage
+
+	requestImage()
+}
+
+function requestImage(){
+	request({
+		uri : 'https://www.assetstore.unity3d.com/api/en-US/content/overview/' + DailyData.id + '.json',
+		followRedirect: false,
+		gzip: true,
+		headers: {
+			'Accept' : 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
+			'Accept-Encoding': 'gzip, deflate, br',
+			'Accept-Language': 'en-US',
+			'Cache-Control': 'max-age=0',
+			'Connection': 'keep-alive',
+			'Cookie': cookieJar,
+			'Host': 'www.assetstore.unity3d.com',
+			'Upgrade-Insecure-Requests': '1',
+			'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.3071.115 Safari/537.36'
+		}
+	}, (err, res, body) => {
+
+		updateImage(JSON.parse(body))
+
+	})
+}
+
+function updateImage(overview){
+	DailyData.icon = overview.content.keyimage.big
+	DailyData.category = overview.content.category.label
+	DailyData.author = overview.content.publisher.label
 
 	wrapUp()
 }
