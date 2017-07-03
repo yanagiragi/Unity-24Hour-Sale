@@ -37,7 +37,7 @@ function auth(url){
 function register(url, cookie, updateCookie=false){
 	console.log('pending ' + url)
 	if(updateCookie){
-		
+
 		// parse cookie
 		cookieJar = ''
 		for (var i = cookie.length - 1; i >= 0; i--) {
@@ -55,9 +55,9 @@ function register(url, cookie, updateCookie=false){
 				cookieJar += str.substring(0, str.indexOf(";") + 1) // include ';'
 			}
 		}
-		
+
 		console.log('Cookie = ' + cookieJar)
-		
+
 		request({
 			uri : 'https://www.assetstore.unity3d.com/api/en-US/sale/results/10.json',
 			followRedirect: false,
@@ -94,12 +94,21 @@ function register(url, cookie, updateCookie=false){
 }
 
 function parse(data){
-	
+
+  // if there's no offer today
+  if(typeof data.daily == "undefined"){
+      DailyData.title = DailyData.id = DailyData.description = DailyData.icon = null
+
+      wrapUp();
+      return;
+  }
+
+
 	DailyData.title = data.daily.title
 	DailyData.id = data.daily.id
 	DailyData.description = data.daily.description
 	DailyData.icon = data.daily.icon
-	
+
 	request({
 		uri : 'https://www.assetstore.unity3d.com/api/en-US/content/price/' + data.daily.id + '.json',
 		followRedirect: false,
@@ -116,9 +125,9 @@ function parse(data){
 			'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.3071.115 Safari/537.36'
 		}
 	}, (err, res, body) => {
-		
+
 		updatePrice(JSON.parse(body))
-		
+
 	})
 }
 
@@ -127,7 +136,7 @@ function updatePrice(priceData){
 	DailyData.price = priceData.price
 	DailyData.percentage = priceData.discount.percentage
 
-	wrapUp()	
+	wrapUp()
 }
 
 function wrapUp(){
